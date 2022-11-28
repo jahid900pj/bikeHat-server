@@ -27,19 +27,53 @@ async function run() {
         // assigment-12
 
         const bikeCategories = client.db('assigment-12').collection('bike-categories')
-
-
-        // app.get('/appointmentSpecialty', async (req, res) => {
-        //     const query = {}
-        //     const result = await appointmentCollections.find(query).project({ name: 1 }).toArray()
-        //     res.send(result)
-        // })
+        const bikeCollections = client.db('assigment-12').collection('bike-collections')
+        const bikeBookings = client.db('assigment-12').collection('bookings')
+        const usersCollections = client.db('assigment-12').collection('users')
 
         app.get('/bikeCategories', async (req, res) => {
             const query = {}
             const result = await bikeCategories.find(query).toArray()
             res.send(result)
         })
+
+
+        app.get('/bikeCollections/:category_id', async (req, res) => {
+            const id = req.params.category_id
+            const query = { category_id: id }
+            const result = await bikeCollections.find(query).toArray()
+            res.send(result)
+        })
+
+        app.post('/bikeBooking', async (req, res) => {
+            const booking = req.body;
+            const result = await bikeBookings.insertOne(booking)
+            res.send(result)
+        })
+
+        app.get('/bikeBooking', async (req, res) => {
+            // const query = {}
+            // console.log('token', req.headers.authorization)
+            const email = req.query.email;
+            // const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail)
+            // if (email !== decodedEmail) {
+            //     return res.status(403).send({ message: 'forbidden access2' })
+            // }
+            const query = { email: email }
+            const bookings = await bikeBookings.find(query).toArray()
+            res.send(bookings)
+
+        })
+
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollections.insertOne(user)
+            res.send(result)
+        })
+
+
     }
     finally {
 

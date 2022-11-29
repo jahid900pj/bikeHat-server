@@ -52,12 +52,13 @@ async function run() {
 
 
 
-        const verifySeller = async (req, res, next) => {
+        const verifyAdmin = async (req, res, next) => {
+            // console.log('inside verify admin', req.decoded.email)
             const decodedEmail = req.decoded.email;
             const query = { email: decodedEmail }
             const user = await usersCollections.findOne(query)
-            if (user?.seller !== true) {
-                return res.status(403).send({ message: 'forbidden access for seller' })
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access admin' })
             }
             next()
         }
@@ -147,7 +148,7 @@ async function run() {
         app.get('/allBuyers', async (req, res) => {
             const query = {}
             const users = await usersCollections.find(query).toArray()
-            const allBuyers = users.filter(user => user.seller === false)
+            const allBuyers = users.filter(user => user.seller !== true)
             res.send(allBuyers)
         })
 
@@ -156,6 +157,20 @@ async function run() {
             const users = await usersCollections.find(query).toArray()
             const allSellers = users.filter(user => user.seller === true)
             res.send(allSellers)
+        })
+
+        app.put('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollections.updateOne(filter, updatedDoc, options)
+            res.send(result)
+
         })
 
     }

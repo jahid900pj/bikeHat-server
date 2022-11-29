@@ -39,7 +39,6 @@ function verifyJWT(req, res, next) {
 
 }
 
-
 async function run() {
     try {
         await client.connect()
@@ -74,7 +73,7 @@ async function run() {
         app.get('/bikeBooking', verifyJWT, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
-            console.log(decodedEmail)
+            // console.log(decodedEmail)
             if (email !== decodedEmail) {
                 return res.status(403).send({ message: 'forbidden access2' })
             }
@@ -83,7 +82,6 @@ async function run() {
             res.send(bookings)
 
         })
-
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
@@ -100,15 +98,17 @@ async function run() {
             res.status(403).send({ accessToken: '' })
         })
 
-
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollections.insertOne(user)
             res.send(result)
         })
 
-
-
+        app.post('/addProduct', async (req, res) => {
+            const product = req.body;
+            const result = await bikeCollections.insertOne(product)
+            res.send(result)
+        })
 
     }
     finally {

@@ -151,6 +151,13 @@ async function run() {
             res.send(allBuyers)
         })
 
+        app.get('/allSellers', async (req, res) => {
+            const query = {}
+            const users = await usersCollections.find(query).toArray()
+            const allSellers = users.filter(user => user.seller === true)
+            res.send(allSellers)
+        })
+
     }
     finally {
 

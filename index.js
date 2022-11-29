@@ -4,7 +4,7 @@ const cors = require('cors')
 require('dotenv').config()
 const colors = require('colors');
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 
 // assigment-12
@@ -49,6 +49,18 @@ async function run() {
         const bikeCollections = client.db('assigment-12').collection('bike-collections')
         const bikeBookings = client.db('assigment-12').collection('bookings')
         const usersCollections = client.db('assigment-12').collection('users')
+
+
+
+        const verifySeller = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail }
+            const user = await usersCollections.findOne(query)
+            if (user?.seller !== true) {
+                return res.status(403).send({ message: 'forbidden access for seller' })
+            }
+            next()
+        }
 
         app.get('/bikeCategories', async (req, res) => {
             const query = {}
@@ -108,6 +120,28 @@ async function run() {
             const product = req.body;
             const result = await bikeCollections.insertOne(product)
             res.send(result)
+        })
+
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email
+            // console.log(email)
+            const query = { email: email }
+            const users = await usersCollections.findOne(query)
+            // console.log(result)
+            res.send({ isSeller: users?.seller === true })
+        })
+
+        app.get('/myProducts/:id', verifyJWT, async (req, res) => {
+            const email = req.params.email
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail }
+            const user = await usersCollections.findOne(query)
+            if (user?.seller !== true) {
+                return res.status(403).send({ message: 'forbidden access ' })
+            }
+            // const query = { email: email }
+            const products = await bikeCollections.find(query).toArray()
+            res.send(products)
         })
 
     }

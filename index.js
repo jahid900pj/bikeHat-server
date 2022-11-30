@@ -63,6 +63,17 @@ async function run() {
             next()
         }
 
+        const verifySeller = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail }
+            const user = await usersCollections.findOne(query)
+            if (user?.seller !== true) {
+                return res.status(403).send({ message: 'forbidden access ' })
+            }
+            next()
+        }
+
+
         app.get('/bikeCategories', async (req, res) => {
             const query = {}
             const result = await bikeCategories.find(query).toArray()
@@ -146,6 +157,14 @@ async function run() {
         })
 
 
+        app.delete('/myProduct/:id', verifyJWT, verifySeller, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const products = await bikeCollections.deleteOne(query)
+            res.send(products)
+        })
+
+
         app.get('/allBuyers', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {}
             const users = await usersCollections.find(query).toArray()
@@ -196,13 +215,6 @@ async function run() {
             const result = await usersCollections.updateOne(filter, updatedDoc, options)
             res.send(result)
         })
-
-        // app.delete('/doctors/:id', verifyJWT, verifyAdmin, async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: ObjectId(id) }
-        //     const result = await doctorsCollections.deleteOne(filter)
-        //     res.send(result)
-        // })
 
         app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;

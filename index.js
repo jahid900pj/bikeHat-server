@@ -128,8 +128,8 @@ async function run() {
             // console.log(email)
             const query = { email: email }
             const users = await usersCollections.findOne(query)
-            // console.log(result)
-            res.send({ isSeller: users?.seller === true })
+            // console.log(users)
+            res.send({ users, isSeller: users?.seller === true })
         })
 
         app.get('/myProducts/:id', verifyJWT, async (req, res) => {
@@ -145,14 +145,15 @@ async function run() {
             res.send(products)
         })
 
-        app.get('/allBuyers', async (req, res) => {
+
+        app.get('/allBuyers', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {}
             const users = await usersCollections.find(query).toArray()
             const allBuyers = users.filter(user => user.seller !== true)
             res.send(allBuyers)
         })
 
-        app.get('/allSellers', async (req, res) => {
+        app.get('/allSellers', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {}
             const users = await usersCollections.find(query).toArray()
             const allSellers = users.filter(user => user.seller === true)
@@ -193,6 +194,20 @@ async function run() {
             }
 
             const result = await usersCollections.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
+        // app.delete('/doctors/:id', verifyJWT, verifyAdmin, async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: ObjectId(id) }
+        //     const result = await doctorsCollections.deleteOne(filter)
+        //     res.send(result)
+        // })
+
+        app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await usersCollections.deleteOne(filter)
             res.send(result)
         })
 

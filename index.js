@@ -128,7 +128,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/addProduct', async (req, res) => {
+        app.post('/addProduct', verifyJWT, verifySeller, async (req, res) => {
             const product = req.body;
             const result = await bikeCollections.insertOne(product)
             res.send(result)

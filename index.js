@@ -159,6 +159,15 @@ async function run() {
             res.send(allSellers)
         })
 
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email
+            // console.log(email)
+            const query = { email }
+            const users = await usersCollections.findOne(query)
+            // console.log(result)
+            res.send({ isAdmin: users?.role === 'admin' })
+        })
+
         app.put('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -171,6 +180,20 @@ async function run() {
             const result = await usersCollections.updateOne(filter, updatedDoc, options)
             res.send(result)
 
+        })
+
+        app.put('/users/verify/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    verified: true
+                }
+            }
+
+            const result = await usersCollections.updateOne(filter, updatedDoc, options)
+            res.send(result)
         })
 
     }
